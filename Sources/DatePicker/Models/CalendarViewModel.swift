@@ -1,5 +1,5 @@
 //
-//  DatePickerViewSections.swift
+//  CalendarViewSections.swift
 //  DatePicker
 //
 //  Created by zhussupali on 04.03.2024.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DatePickerViewSections {
+public struct CalendarViewModel {
     var month: Month
     var year: Int
     var startIndex: Int

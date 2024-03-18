@@ -1,5 +1,5 @@
 //
-//  DatePickerCollectionHeaderView.swift
+//  CalendarHeaderView.swift
 //  DatePicker
 //
 //  Created by zhussupali on 04.03.2024.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DatePickerCollectionHeaderView: UICollectionReusableView {
+final class CalendarHeaderView: UICollectionReusableView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -27,7 +27,7 @@ final class DatePickerCollectionHeaderView: UICollectionReusableView {
 
 // MARK: - Public methods
 
-extension DatePickerCollectionHeaderView {
+extension CalendarHeaderView {
     func configure(with title: String) {
         titleLabel.text = title
     }
@@ -41,14 +41,14 @@ extension DatePickerCollectionHeaderView {
 
 // MARK: - Private methods
 
-private extension DatePickerCollectionHeaderView {
+private extension CalendarHeaderView {
     func setupView() {
         addSubview(titleLabel)
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            titleLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16),
-            titleLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -16),
-            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor),
+            titleLabel.leftAnchor.constraint(equalTo: leftAnchor),
+            titleLabel.rightAnchor.constraint(equalTo: rightAnchor),
+            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 }

@@ -1,5 +1,5 @@
 //
-//  DatePickerCollectionViewCell.swift
+//  CalendarDateCollectionCell.swift
 //  DatePicker
 //
 //  Created by zhussupali on 29.02.2024.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class DatePickerCollectionViewCell: UICollectionViewCell {
+final class CalendarDateCollectionCell: UICollectionViewCell {
     private var containerSelectedColor: UIColor?
     private var lineSelectedColor: UIColor?
     private var labelSelectedColor: UIColor?
@@ -56,7 +56,7 @@ final class DatePickerCollectionViewCell: UICollectionViewCell {
 
 // MARK: - Public methods
 
-extension DatePickerCollectionViewCell {
+extension CalendarDateCollectionCell {
     func configure(with appearance: DatePickerAppearance) {
         containerSelectedColor = appearance.containerSelectedColor
         lineSelectedColor = appearance.lineSelectedColor
@@ -96,7 +96,7 @@ extension DatePickerCollectionViewCell {
 
 // MARK: - Private methods
 
-private extension DatePickerCollectionViewCell {
+private extension CalendarDateCollectionCell {
     func setupView() {
         contentView.addSubview(lineView)
         NSLayoutConstraint.activate([
