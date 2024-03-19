@@ -13,18 +13,18 @@ protocol CalendarViewDelegate: AnyObject {
 
 final class CalendarView: UIView {
     weak var delegate: CalendarViewDelegate?
-    
-    let headerHeight: CGFloat = 24
     var cellSize: CGFloat = 0
-    var viewModel: CalendarViewModel?
-    lazy var heightConstraint: NSLayoutConstraint = {
+    
+    private(set) var selectedDates: [Date] = []
+    private(set) var appearance = DatePickerAppearance()
+    private(set) var viewModel: CalendarViewModel?
+    
+    private let headerHeight: CGFloat = 24
+    private lazy var heightConstraint: NSLayoutConstraint = {
         let constraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: 100)
         constraint.isActive = true
         return constraint
     }()
-    
-    private(set) var selectedDates: [Date] = []
-    private(set) var appearance = DatePickerAppearance()
     
     private(set) lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -57,6 +57,7 @@ extension CalendarView {
     func configure(with viewModel: CalendarViewModel) {
         self.viewModel = viewModel
         collectionView.reloadData()
+        updateHeight()
     }
     
     func configure(appearance: (DatePickerAppearance) -> Void) {
@@ -82,5 +83,10 @@ private extension CalendarView {
             collectionView.rightAnchor.constraint(equalTo: safeAreaLayoutGuide.rightAnchor),
             collectionView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
         ])
+    }
+    
+    func updateHeight() {
+        let height = headerHeight + (cellSize * (CGFloat(viewModel?.dates.count ?? 0) + CGFloat(viewModel?.startIndex ?? 0)) / 7) + 32
+        heightConstraint.constant = height
     }
 }

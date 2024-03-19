@@ -21,8 +21,8 @@ extension CalendarView: UICollectionViewDataSource {
         let startIndex = viewModel.startIndex
         cell.configure(with: appearance)
         
-        if indexPath.item >= startIndex {
-            let date = viewModel.dates[indexPath.item - startIndex]
+        if indexPath.item >= startIndex,
+           let date = viewModel.dates[safe: indexPath.item - startIndex] {
             cell.label.text = date.day.description
             if selectedDates.contains(date) {
                 let isEdge = selectedDates.first == date || selectedDates.last == date
@@ -64,7 +64,6 @@ extension CalendarView: UICollectionViewDelegateFlowLayout {
         let size = collectionView.bounds.size.width / 7.0
         if self.cellSize != size {
             self.cellSize = size
-            updateHeightIfNeeded()
         }
         return CGSize(width: size, height: size)
     }
@@ -75,14 +74,5 @@ extension CalendarView: UICollectionViewDelegateFlowLayout {
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         0
-    }
-}
-
-// MARK: - Private methods
-
-private extension CalendarView {
-    func updateHeightIfNeeded() {
-        let height = headerHeight + (cellSize * CGFloat(viewModel?.dates.count ?? 0) / 7) + 32
-        heightConstraint.constant = height
     }
 }
