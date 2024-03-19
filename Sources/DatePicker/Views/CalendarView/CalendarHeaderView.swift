@@ -32,10 +32,9 @@ extension CalendarHeaderView {
         titleLabel.text = title
     }
     
-    func configure(appearnace: DatePickerAppearance) {
-        backgroundColor = appearnace.backgroundColor
-        titleLabel.textColor = appearnace.headerLabelColor
-        titleLabel.font = appearnace.headerFont
+    func configure(appearnace: DatePickerAppearance.Elements?) {
+        titleLabel.textColor = appearnace?.headerTextColor
+        titleLabel.font = appearnace?.datesFont
     }
 }
 

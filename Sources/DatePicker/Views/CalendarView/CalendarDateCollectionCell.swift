@@ -11,7 +11,7 @@ final class CalendarDateCollectionCell: UICollectionViewCell {
     private var containerSelectedColor: UIColor?
     private var lineSelectedColor: UIColor?
     private var labelSelectedColor: UIColor?
-    private var labelSelectedOnEdgeColor: UIColor = .white
+    private var labelSelectedOnEdgeColor: UIColor?
     private var labelNormalColor: UIColor?
     
     private(set) lazy var label: UILabel = {
@@ -57,16 +57,15 @@ final class CalendarDateCollectionCell: UICollectionViewCell {
 // MARK: - Public methods
 
 extension CalendarDateCollectionCell {
-    func configure(with appearance: DatePickerAppearance) {
-        containerSelectedColor = appearance.containerSelectedColor
-        lineSelectedColor = appearance.lineSelectedColor
-        labelSelectedColor = appearance.labelSelectedColor
-        labelSelectedOnEdgeColor = appearance.labelSelectedOnEdgeColor
-        labelNormalColor = appearance.labelNormalColor
-        backgroundColor = appearance.backgroundColor
+    func configure(with appearance: DatePickerAppearance.Elements?) {
+        containerSelectedColor = appearance?.selectedDateEdgeBackgroundColor
+        lineSelectedColor = appearance?.selectedDateBackgroundColor
+        labelSelectedColor = appearance?.selectedDateTextColor
+        labelSelectedOnEdgeColor = appearance?.selectedDateEdgeTextColor
+        labelNormalColor = appearance?.dateTextColor
         
         label.textColor = labelNormalColor
-        label.font = appearance.datesFont
+        label.font = appearance?.datesFont
     }
     
     func setSelected(_ selected: Bool, isEdge: Bool) {

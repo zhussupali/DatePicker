@@ -22,17 +22,22 @@ public final class DatePicker: UIControl {
     private var selectedDates: [Date] = []
     private var selectionStyle: SelectionStyle = .range
     private let displayMode: MonthDisplayMode = .allMonths
+    private var appearance = DatePickerAppearance()
     
-    private lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .clear
-        collectionView.register(DatePickerCollectionCell.self, forCellWithReuseIdentifier: DatePickerCollectionCell.description())
-        return collectionView
+    private let headerView = DatePickerHeaderView()
+    
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        DispatchQueue.main.async {
+            tableView.backgroundColor = .clear
+            tableView.separatorStyle = .none
+        }
+        tableView.showsVerticalScrollIndicator = false
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(DatePickerTableCell.self, forCellReuseIdentifier: DatePickerTableCell.description())
+        return tableView
     }()
     
     public override init(frame: CGRect) {
@@ -50,15 +55,14 @@ public final class DatePicker: UIControl {
 
 public extension DatePicker {
     func configure(with date: Date) {
-        self.items = [
-            .init(date: date.date(byAdding: .month, value: -1)),
-            .init(date: date),
-            .init(date: date.date(byAdding: .month, value: 1))
-        ]
-        DispatchQueue.main.async {
-            self.collectionView.reloadData()
-            self.collectionView.scrollToItem(at: IndexPath(item: 1, section: 0), at: .top, animated: false)
-        }
+        self.items = [.init(date: date)]
+        loadPrevious()
+    }
+    
+    func configure(appearance: (DatePickerAppearance) -> Void) {
+        appearance(self.appearance)
+        headerView.configure(appearance: self.appearance.header)
+        tableView.reloadData()
     }
 }
 
@@ -67,33 +71,34 @@ public extension DatePicker {
 private extension DatePicker {
     func setupView() {
         backgroundColor = .clear
-        addSubview(collectionView)
+        addSubview(tableView)
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            collectionView.leftAnchor.constraint(equalTo: safeAreaLayoutGuide.leftAnchor),
-            collectionView.rightAnchor.constraint(equalTo: safeAreaLayoutGuide.rightAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            tableView.leftAnchor.constraint(equalTo: safeAreaLayoutGuide.leftAnchor),
+            tableView.rightAnchor.constraint(equalTo: safeAreaLayoutGuide.rightAnchor),
+            tableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
         ])
     }
 }
 
 // MARK: - DatePicker
 
-extension DatePicker: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+extension DatePicker: UITableViewDelegate, UITableViewDataSource {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         items.count
     }
     
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DatePickerCollectionCell.description(), for: indexPath) as! DatePickerCollectionCell
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: DatePickerTableCell.description(), for: indexPath) as! DatePickerTableCell
         cell.configure(calendar: items[indexPath.item])
         cell.configure(selectedDates: selectedDates)
+        cell.configure(appearance: appearance)
         cell.delegate = self
         return cell
     }
     
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: collectionView.frame.width, height: 0)
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        headerView
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -101,34 +106,34 @@ extension DatePicker: UICollectionViewDelegate, UICollectionViewDataSource, UICo
         let contentHeight = scrollView.contentSize.height
         let frameHeight = scrollView.frame.height
         
-        if contentOffsetY < -20 {
-            loadPreviousSection()
+        if contentOffsetY < 20 {
+            loadPrevious()
         }
         
         if contentOffsetY + frameHeight >= contentHeight {
-            loadNextSection()
+            loadNext()
         }
     }
     
-    func loadPreviousSection() {
+    func loadPrevious() {
         guard let date = items.first?.dates.first,
               isPagingEnabled(for: date)
         else { return }
         
         let previous = date.date(byAdding: .month, value: -1)
         items = [.init(date: previous)] + items
-        collectionView.reloadData()
-        collectionView.scrollToItem(at: IndexPath(item: 2, section: 0), at: .bottom, animated: false)
+        tableView.reloadData()
+        tableView.scrollToRow(at: IndexPath(item: 1, section: 0), at: .top, animated: false)
     }
     
-    func loadNextSection() {
+    func loadNext() {
         guard let date = items.last?.dates.last,
               isPagingEnabled(for: date)
         else { return }
         
         let next = date.date(byAdding: .month, value: 1)
         items = items + [.init(date: next)]
-        collectionView.reloadData()
+        tableView.reloadData()
     }
     
     func isPagingEnabled(for date: Date) -> Bool {
@@ -153,9 +158,9 @@ extension DatePicker: UICollectionViewDelegate, UICollectionViewDataSource, UICo
     }
 }
 
-// MARK: - DatePickerCollectionCellDelegate
+// MARK: - DatePickerTableCellDelegate
 
-extension DatePicker: DatePickerCollectionCellDelegate {
+extension DatePicker: DatePickerTableCellDelegate {
     func didSelect(date: Date) {
         switch selectionStyle {
         case .single:
@@ -173,8 +178,10 @@ extension DatePicker: DatePickerCollectionCellDelegate {
             } else {
                 selectedDates.removeAll()
             }
+            headerView.configure(startDate: selectedDates.first?.description(.day, .month(format: .numeric), .year))
+            headerView.configure(endDate: selectedDates.last?.description(.day, .month(format: .numeric), .year))
         }
         print(selectedDates.compactMap { $0.day.description + ", " + $0.month.description(in: .name) })
-        collectionView.reloadData()
+        tableView.reloadData()
     }
 }
